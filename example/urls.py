@@ -18,17 +18,20 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
-from docs.views import UserViewSets, Kathi
+from docs.views import UserViewSets, Kathi, FileUploadView, QueryView
+
+router = DefaultRouter()
+# router.register('users', UserViewSets, basename='User')
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('kathi/', Kathi.as_view(), name='Kathi'),
+    path('upload/', FileUploadView.as_view(), name='File Upload'),
+    path('query/', QueryView.as_view(), name='Query'),
+
 ]
 
-router = DefaultRouter()
-router.register('users', UserViewSets, basename='User')
-router.register('kathi', Kathi.return_something, basename='Static Method')
-
-urlpatterns += router.urls
+# urlpatterns += router.urls
