@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>File Upload and Chatbot Example</title>
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<!-- Bootstrap JS -->
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+	<!-- Custom CSS -->
+	<style>
+		.container {
+			max-width: 800px;
+			margin: auto;
+			padding-top: 50px;
+		}
+		#chat-container {
+			height: 300px;
+			overflow-y: scroll;
+			border: 1px solid #ccc;
+			margin-top: 10px;
+			padding: 10px;
+		}
+		.chatbot {
+			color: green;
+			float: right;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>File Upload and Chatbot Example</h1>
+		<form id="upload-form">
+			<div class="form-group">
+				<label for="file-input">Select a file to upload:</label>
+				<input type="file" class="form-control-file" id="file-input">
+			</div>
+			<button type="submit" class="btn btn-primary">Upload File</button>
+		</form>
+		<div id="upload-message" class="mt-3"></div>
+		<div id="chat-container" class="mt-5"></div>
+		<form id="chat-form" class="mt-5">
+			<div class="form-group">
+				<label for="chat-input">Ask a question:</label>
+				<input type="text" class="form-control" id="chat-input" disabled>
+			</div>
+			<button type="submit" class="btn btn-primary" disabled>Send</button>
+		</form>
+	</div>
+	<!-- Custom JS -->
+	<script>
+		var accessToken = "";
+		$(document).ready(function(){
+			$('#upload-message').empty();
+			$.ajax({
+				url: 'http://localhost:8000/api/token/',
+				type: 'POST',
+				data: {'username': 'kathi', 'password': 'ihtak'},
+				success: function(response) {
+					accessToken = response.access;
+				},
+				error: function(xhr, status, error) {
+					$('#upload-message').text(xhr.responseJSON.message).addClass('alert alert-danger');
+				}
+			});
+		})
+		// file upload form submit event
+		$('#upload-form').submit(function(event) {
+			event.preventDefault();
+			$('#upload-message').empty();
+			var formData = new FormData();
+			formData.append('file', $('#file-input')[0].files[0]);
+			$.ajax({
+				url: 'http://localhost:8000/upload/',
+				type: 'POST',
+				data: formData,
+				cache: false,
+				dataType: 'json',
+				crossDomain: true,
+				contentType: false,
+				processData: false,
+				beforeSend: function (xhr) {
+					xhr.setRequestHeader ("Authorization", "Bearer " + accessToken);
+				},
+				success: function(response) {
+					$('#upload-message').text(response.message).addClass('alert alert-success');
+					// enable chat input and send button
+					$('#chat-input').removeAttr('disabled');
+					$('#chat-form button[type="submit"]').removeAttr('disabled');
+				},
+				error: function(xhr, status, error) {
+					$('#upload-message').text(xhr.responseJSON.message).addClass('alert alert-danger');
+				}
+			});
+		});
+
+		// chat form submit event
+		$('#chat-form').submit(function(event) {
+			event.preventDefault();
+			var question = $('#chat-input').val().trim();
+			if (question == '') {
+				return;
+			}
+			var chatDiv = $('<div class="chat"></div>').text(question);
+			$('#chat-container').append(chatDiv);
+			$('#chat-input').val('');
+			// call chatbot API with question
+			$.ajax({
+				url: 'http://localhost:8000/query/',
+				dataType: 'json',
+				crossDomain: true,
+				type: 'POST',
+				data: {'query': question},
+			beforeSend: function (xhr) {
+				xhr.setRequestHeader ("Authorization", "Bearer " + accessToken);
+			},
+			success: function(response) {
+				var answer = response.response.content;
+				// append chatbot response to conversation
+				var chatDiv = $('<div class="chat chatbot"></div>').html(answer);
+				$('#chat-container').append(chatDiv);
+			},
+			error: function(xhr, status, error) {
+				var errorMessage = 'Error: ' + xhr.responseJSON.response.content;
+				var chatDiv = $('<div class="chat chatbot"></div>').html(errorMessage);
+				$('#chat-container').append(chatDiv);
+			}
+		});
+	});
+</script>
+</body>
+</html>
