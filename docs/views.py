@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 import os
 from docs.chatbot import Chatbot
+from django.shortcuts import render
 
 
 # Create your views here.
@@ -76,7 +77,11 @@ class QueryView(APIView):
 
     def post(self, request, format=None):
         query = request.data['query']
-        bot = Chatbot("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", path=os.path.join(os.getcwd(), 'data'))
+        bot = Chatbot("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", path=os.path.join(os.getcwd(), 'data'))
         response = bot.generate_response(query)
 
         return Response({'response': response})
+
+
+def index(request):
+    return render(request, 'index.html')

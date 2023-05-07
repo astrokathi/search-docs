@@ -6,3 +6,4 @@ djangorestframework-simplejwt
 openai
 llama_index
 langchain
+PyPDF2

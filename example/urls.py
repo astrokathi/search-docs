@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework.routers import DefaultRouter
-from docs.views import UserViewSets, Kathi, FileUploadView, QueryView
+from docs.views import UserViewSets, Kathi, FileUploadView, QueryView, index
 
 router = DefaultRouter()
 # router.register('users', UserViewSets, basename='User')
@@ -31,6 +31,7 @@ urlpatterns = [
     path('kathi/', Kathi.as_view(), name='Kathi'),
     path('upload/', FileUploadView.as_view(), name='File Upload'),
     path('query/', QueryView.as_view(), name='Query'),
+    path('home/', index, name="HomePage")
 
 ]
 
