@@ -75,9 +75,12 @@ class QueryView(APIView):
     serializer_class = QuerySerializer
     permission_classes = (IsAuthenticated,)
 
+    print(os.environ)
+    API_KEY = os.environ["OPENAI_API_KEY"]
+
     def post(self, request, format=None):
         query = request.data['query']
-        bot = Chatbot("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", path=os.path.join(os.getcwd(), 'data'))
+        bot = Chatbot(api_key=self.API_KEY, path=os.path.join(os.getcwd(), 'data'))
         response = bot.generate_response(query)
 
         return Response({'response': response})
